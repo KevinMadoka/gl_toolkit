@@ -288,9 +288,4 @@ terminating()
 }
 
 
-int main()
-{
-    gl_toolkit::Renderer renderer;
-    renderer.rendering();
-}
 
