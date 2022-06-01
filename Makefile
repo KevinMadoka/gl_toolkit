@@ -33,10 +33,13 @@ $(build_dir)/%.cpp.o: %.cpp
 
 
 
-.PHONY: clean
+.PHONY: clean test
 
 clean:
 	rm -r $(build_dir)
+
+test:
+	$(build_dir)/$(target)
 
 
 -include $(depends)

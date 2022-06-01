@@ -19,6 +19,7 @@
 #include <GL/glfw3.h>
 #endif  /* ifdef __APPLE__ */
 
+#include "loader/loader.h"
 
 // Vertex data and buffer
 float vertices[] = {
@@ -27,30 +28,10 @@ float vertices[] = {
     0.0f,  0.5f, 0.0f
 };
 
-// Vertex shader
-const std::string strVertexShaderSource (
-    "#version 410 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0"
-);
 
-// Fragment shader
-const std::string strFragmentShaderSource (
-    "#version 410 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   float lerpValue = gl_FragCoord.y / 480.0f;\n"
-    "   FragColor = mix(vec4(1.0f, 0.5f, 0.2f, 1.0f), vec4(0.1f, 0.1f, 0.1f, 0.1f), lerpValue);\n"
-    "}\0"
-);
-
-
+void
 gl_toolkit::Renderer::
-Renderer()
+init()
 {
     // Set callback for errors
     glfwSetErrorCallback(errorCallback);
@@ -70,6 +51,22 @@ Renderer()
     glfwSwapInterval(1);
 
     init_opengl();
+}
+
+
+gl_toolkit::Renderer::
+Renderer(const std::string& vert_path, const std::string& frag_path)
+{
+    Loader loader;
+
+    // Load the shader source from another files
+    loader.load_from_file(vert_path);
+    this->vertex_shader_src = loader.get_content();
+
+    loader.load_from_file(frag_path);
+    this->fragment_shader_src = loader.get_content();
+
+    init();
 }
 
 void
@@ -184,8 +181,10 @@ init_program()
 {
     std::vector<GLuint> shaderList;
 
-    shaderList.push_back(create_shader(GL_VERTEX_SHADER, strVertexShaderSource));
-    shaderList.push_back(create_shader(GL_FRAGMENT_SHADER, strFragmentShaderSource));
+    // Using loader/loader.h to load vertex shader and fragment shader files
+
+    shaderList.push_back(create_shader(GL_VERTEX_SHADER, this->vertex_shader_src));
+    shaderList.push_back(create_shader(GL_FRAGMENT_SHADER, this->fragment_shader_src));
 
     this->program = create_program(shaderList);
 

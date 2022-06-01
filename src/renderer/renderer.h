@@ -19,6 +19,8 @@
 #include <GL/glfw3.h>
 #endif  /* ifdef __APPLE__ */
 
+#include "loader/loader.h"
+
 namespace gl_toolkit {
 
 class Renderer
@@ -28,8 +30,12 @@ private:
     GLuint      program;
     GLuint      vao;        /* vertex array object */
     GLuint      vbo;        /* vertex buffer object */
+    std::string vertex_shader_src;
+    std::string fragment_shader_src;
+    void init();
 public:
     Renderer();
+    Renderer(const std::string& vert_path, const std::string& frag_path);
     static void errorCallback(int error, const char *description);
     static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
     static void frameBufferResizeCallback(GLFWwindow *window, int width, int height);
