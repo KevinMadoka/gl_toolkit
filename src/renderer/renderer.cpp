@@ -1,7 +1,9 @@
 
 #include "renderer/renderer.h"
 
+#include <math.h>
 
+#include <cstring>
 #include <algorithm>
 #include <vector>
 #include <string>
@@ -21,13 +23,26 @@
 
 #include "loader/loader.h"
 
+
 // Vertex data and buffer
-float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-    0.5f, -0.5f, 0.0f,
-    0.0f,  0.5f, 0.0f
+const float vertices[] = {
+	0.25f, 0.25f, 0.0f, 1.0f,
+	0.25f, -0.25f, 0.0f, 1.0f,
+	-0.25f, -0.25f, 0.0f, 1.0f
 };
 
+void ComputePositionOffsets(float &fXOffset, float &fYOffset)
+{
+    const float fLoopDuration = 2.0f;
+    const float fScale = 3.14159f * 2.0f / fLoopDuration;
+
+    float fElapsedTime = float(glfwGetTime());
+
+    float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
+
+    fXOffset = cosf(fCurrTimeThroughLoop * fScale) * 0.5f;
+    fYOffset = sinf(fCurrTimeThroughLoop * fScale) * 0.5f;
+}
 
 void
 gl_toolkit::Renderer::
@@ -92,7 +107,7 @@ gl_toolkit::Renderer::
 init_opengl()
 {
     //OpenGL initializations start from here
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     init_vertex_array_object();
 
@@ -104,8 +119,8 @@ init_opengl()
     glUseProgram(this->program);
 
     // Formating  buffers' data
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
     //OpenGL initializations end here
 }
@@ -207,7 +222,7 @@ gl_toolkit::Renderer::
 create_window()
 {
     // Create a windowed mode window and its OpenGL context
-    this->window = glfwCreateWindow(640, 480, "Running OpenGL on Mac", NULL, NULL);
+    this->window = glfwCreateWindow(500, 500, "Running OpenGL on Mac", NULL, NULL);
     if (!this->window)
     {
         glfwTerminate();
@@ -254,9 +269,14 @@ void
 gl_toolkit::Renderer::
 rendering()
 {
+    // Get the uniform location "offset" by calling glGetUniformLocation
+    GLint offset_location;
+    offset_location = glGetUniformLocation(this->program, "offset");
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(this->window))
     {
+        float fXOffset = 0.0f, fYOffset = 0.0f;
+        ComputePositionOffsets(fXOffset, fYOffset);
         // Resize the viewport
         int width, height;
         glfwGetFramebufferSize(this->window, &width, &height);
@@ -264,10 +284,12 @@ rendering()
 
         // OpenGL Rendering related code
         glClear(GL_COLOR_BUFFER_BIT);
-        glUseProgram(this->program);
         glBindVertexArray(vao);
         glDrawArrays(GL_TRIANGLES, 0, 3);
+        glUseProgram(this->program);
 
+        // Changing the uniform "offset" to demonstrate moving triangle demonstration
+        glUniform2f(offset_location, fXOffset, fYOffset);
         // Swap front and back buffers
         glfwSwapBuffers(this->window);
 

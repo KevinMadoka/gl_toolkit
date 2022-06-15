@@ -51,6 +51,9 @@ public:
 
     void rendering();
     void terminating();
+
+
+    // For moving triangle tutorial
 };
 
 
