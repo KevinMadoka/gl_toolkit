@@ -284,7 +284,10 @@ rendering()
 
         // OpenGL Rendering related code
         glClear(GL_COLOR_BUFFER_BIT);
-        glBindVertexArray(vao);
+        /*
+         * Seems unnecessary to rebind vertex array object
+         * */
+        //glBindVertexArray(vao);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glUseProgram(this->program);
 
